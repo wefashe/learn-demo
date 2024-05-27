@@ -11,5 +11,24 @@ spring:
   web:
     resources:
       add-mappings: false
+  datasource:
+    url: jdbc:h2:./test.db;AUTO_SERVER=TRUE;MODE=MYSQL;
+    driver-class-name: org.h2.Driver
+    username: root
+    password: 123456
+  h2:
+    console:
+      enabled: true
+      path: /h2
+      settings:
+        web-allow-others: true
+  jpa:
+    hibernate:
+#      ddl-auto: none
+#      dialect: org.hibernate.dialect.MySQL5Dialect
+      show-sql: true
+#      database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    show-sql: true
+    open-in-view: false
 
 
