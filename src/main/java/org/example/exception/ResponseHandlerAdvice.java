@@ -36,8 +36,8 @@ public class ResponseHandlerAdvice implements ResponseBodyAdvice<Object> {
         // String类型不能直接包装，所以要进行些特别的处理
         if (returnType.getGenericParameterType().equals(String.class)) {
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            return objectMapper.writeValueAsString(new ResponseData(ResponseEnum.RC1000, body));
+            return objectMapper.writeValueAsString(new ResponseData(ResponseEnum.RC200, body));
         }
-        return new ResponseData(ResponseEnum.RC1000, body);
+        return new ResponseData(ResponseEnum.RC200, body);
     }
 }

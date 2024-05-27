@@ -6,11 +6,15 @@ import org.example.domain.ResponseEnum;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
@@ -59,7 +63,43 @@ public class ExceptionHandlerAdvice {
                     .map(ObjectError::getDefaultMessage)
                     .collect(Collectors.joining("; ")));
         }
-        return ResponseData.error(ResponseEnum.RC1001, sb.toString());
+        return ResponseData.error(ResponseEnum.RC501, sb.toString());
+    }
+
+    /**
+     * 处理空指针的异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = NullPointerException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseData nullPointerExceptionHandler(NullPointerException e) {
+        log.error("空指针异常 ", e);
+        return ResponseData.error(ResponseEnum.RC400);
+    }
+
+    /**
+     * 处理请求方式错误(405)异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ResponseData requestMethodNotSupportedExceptionHandler(HttpServletRequest req, Exception e) {
+        log.error("405异常, method = {}, path = {}", req.getMethod(), req.getServletPath(), e);
+        return ResponseData.error(ResponseEnum.RC405);
+    }
+
+    /**
+     * 处理404异常
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseData noHandlerFoundExceptionHandler(HttpServletRequest req, Exception e) {
+        log.error("404异常, method = {}, path = {} ", req.getMethod(), req.getServletPath(), e);
+        return ResponseData.error(ResponseEnum.RC404);
     }
 
     /**
@@ -71,7 +111,7 @@ public class ExceptionHandlerAdvice {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseData throwableHandler(Throwable e){
         log.error("系统未知异常！", e);
-        return ResponseData.error(ResponseEnum.RC9999);
+        return ResponseData.error(ResponseEnum.RC500);
     }
 }
 

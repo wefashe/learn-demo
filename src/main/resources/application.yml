@@ -3,4 +3,13 @@ server:
 swagger:
   enabled: true
 
+#  当HTTP状态码为4xx时直接抛出异常
+spring:
+  mvc:
+    throw-exception-if-no-handler-found: true
+  #  关闭默认的静态资源路径映射
+  web:
+    resources:
+      add-mappings: false
+
 

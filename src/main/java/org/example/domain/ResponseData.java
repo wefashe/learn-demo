@@ -38,11 +38,11 @@ public class ResponseData<T> implements Serializable {
     }
 
     public static <T> ResponseData<T> success() {
-        return new ResponseData<T>(ResponseEnum.RC1000);
+        return new ResponseData<T>(ResponseEnum.RC200);
     }
 
     public static <T> ResponseData<T> success(T data) {
-        return new ResponseData<T>(ResponseEnum.RC1000, data);
+        return new ResponseData<T>(ResponseEnum.RC200, data);
     }
 
     public static  <T> ResponseData<T> error(Integer code, String msg) {
@@ -59,6 +59,6 @@ public class ResponseData<T> implements Serializable {
 
     @JsonIgnore
     public boolean isSuccess() {
-        return ResponseEnum.RC1000.getCode()  == this.getCode() ;
+        return ResponseEnum.RC200.getCode()  == this.getCode() ;
     }
 }
