@@ -12,4 +12,9 @@ public class UserServiceImpl extends BaseServiceImpl<UserDO, Long> implements Us
     @Autowired
     private UserRepository userRepository;
 
+    @Override
+    public UserDO login(UserDO userDO) {
+        return userRepository.findByUsernameAndPassword(userDO.getUsername(), userDO.getPassword());
+    }
+
 }
