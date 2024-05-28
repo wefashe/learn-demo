@@ -4,30 +4,31 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Comment;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@DynamicInsert
+@DynamicUpdate // 只更新插入存在值的字段
+@Entity // user表名在h2中是关键字
 @Builder
-public class UserDTO extends BaseDTO {
+public class UserDTO extends BaseDTO implements Serializable {
 
-    @Column
-    @Comment("昵称")
+    @Column(nullable = false)
     private String nickName;
 
-    @Column
-    @Comment("账户")
+    @Column(unique = true, nullable = false)
     private String username;
 
-    @Column
-    @Comment("密码")
+    @Column(nullable = false)
     private String password;
 
-    @Column
-    @Comment("邮箱")
+    @Column(nullable = false)
     private String email;
 }

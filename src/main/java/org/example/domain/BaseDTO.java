@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -20,21 +21,31 @@ public abstract class BaseDTO implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false)
     protected Long id;
 
+//    @Column(nullable = false)
+//    private boolean status;
+
     @CreatedBy
+    @Column(nullable = false)
     protected Long createBy;
 
     @CreatedDate
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Temporal(TemporalType.DATE) // Java的Date对象转换为指定格式的数据库Date类型
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 将Java的Date对象转换为指定格式的Json数据
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 指定格式的Json字符串数据转换为Java的Date对象
+    @Column(nullable = false)
     protected Date createTime;
 
     @LastModifiedBy
+    @Column(nullable = false)
     protected Long updateBy;
 
     @LastModifiedDate
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Column(nullable = false)
     protected Date updateTime;
 }
