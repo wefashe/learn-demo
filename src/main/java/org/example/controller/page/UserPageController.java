@@ -1,6 +1,5 @@
 package org.example.controller.page;
 
-import org.example.annotation.NoResponseBody;
 import org.example.domain.dos.UserDO;
 import org.example.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
