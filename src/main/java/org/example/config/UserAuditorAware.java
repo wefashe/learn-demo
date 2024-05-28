@@ -10,7 +10,11 @@ public class UserAuditorAware implements AuditorAware<Long> {
     @Override
     public Optional<Long> getCurrentAuditor() {
         //从session中获取当前登录用户的id
-        Long id = 2L;
-        return Optional.of(id);
+        Long userId = 3L;
+        if (userId != null){
+            return Optional.of(userId);
+        } else {
+            return Optional.empty();
+        }
     }
 }

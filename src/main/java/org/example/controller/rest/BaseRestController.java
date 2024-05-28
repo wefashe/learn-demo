@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.controller.rest;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.dos.BaseDO;
@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 
 @Slf4j
 @RestController
-public abstract class BaseController<T extends BaseDO, ID> {
+public abstract class BaseRestController<T extends BaseDO, ID> {
 
     @Autowired
     protected BaseService<T, ID> service;

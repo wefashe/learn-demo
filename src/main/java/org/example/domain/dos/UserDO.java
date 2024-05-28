@@ -10,9 +10,11 @@ import org.example.domain.groups.register;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
@@ -26,6 +28,7 @@ import java.io.Serializable;
 @DynamicUpdate // 只更新插入存在值的字段
 @Entity(name = "sys_user") // user表名在h2中是关键字
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 public class UserDO extends BaseDO implements Serializable {
 
     @Column(nullable = false)

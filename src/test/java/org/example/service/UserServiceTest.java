@@ -33,4 +33,20 @@ public class UserServiceTest {
         UserDO userDO = userService.findById(1L);
         System.out.println(userDO);
     }
+
+    @Test
+    public void updateUserTest(){
+        List<UserDO> userList = (List<UserDO>) userService.findAll();
+        if(userList == null || userList.size() == 0){
+            return;
+        }
+        UserDO user = userList.get(0);
+        user.setNickName(user.getNickName() + "-test");
+        user.setUpdateBy(null);
+        user.setCreateBy(null);
+        user.setCreateTime(null);
+        user.setUpdateBy(null);
+        // 设置了id就是修改
+        userService.update(user);
+    }
 }

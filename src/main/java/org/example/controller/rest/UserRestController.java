@@ -1,11 +1,11 @@
-package org.example.controller;
+package org.example.controller.rest;
 
 import org.example.domain.dos.UserDO;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("user")
-public class UserController extends BaseController<UserDO,Long> {
+public class UserRestController extends BaseRestController<UserDO,Long> {
 
     /**
      * 注册
