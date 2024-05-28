@@ -24,15 +24,12 @@ public abstract class BaseDTO implements Serializable {
     @Column(nullable = false)
     protected Long id;
 
-//    @Column(nullable = false)
-//    private boolean status;
-
     @CreatedBy
     @Column(nullable = false)
     protected Long createBy;
 
     @CreatedDate
-    @Temporal(TemporalType.DATE) // Java的Date对象转换为指定格式的数据库Date类型
+    @Temporal(TemporalType.TIMESTAMP) // Java的Date对象转换为指定格式的数据库Date类型
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 将Java的Date对象转换为指定格式的Json数据
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 指定格式的Json字符串数据转换为Java的Date对象
     @Column(nullable = false)
@@ -43,7 +40,7 @@ public abstract class BaseDTO implements Serializable {
     protected Long updateBy;
 
     @LastModifiedDate
-    @Temporal(TemporalType.DATE)
+    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(nullable = false)
