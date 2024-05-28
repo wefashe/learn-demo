@@ -21,4 +21,10 @@ public class UserServiceTest {
         List<UserDTO> userDTOList = (List<UserDTO>) userService.findAll();
         System.out.println(userDTOList);
     }
+
+    @Test
+    public void existByIdTest(){
+        boolean exist = userService.existById(11L);
+        System.out.println("数据是否存在："+ exist);
+    }
 }
