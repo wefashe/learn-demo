@@ -1,8 +1,8 @@
 package org.example.service;
 
-import org.example.domain.BaseDTO;
+import org.example.domain.dos.BaseDO;
 
-public interface BaseService<T extends BaseDTO, ID> {
+public interface BaseService<T extends BaseDO, ID> {
 
     /**
      * 通过单个ID获取单个数据

@@ -1,6 +1,6 @@
 package org.example.exception;
 import lombok.Data;
-import org.example.domain.ResponseEnum;
+import org.example.enums.ResponseEnum;
 
 /**
  * 自定义异常

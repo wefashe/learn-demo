@@ -1,6 +1,6 @@
 package org.example.service;
 
-import org.example.domain.UserDTO;
+import org.example.domain.dos.UserDO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ public class UserServiceTest {
 
     @Test
     public void findAllTest(){
-        List<UserDTO> userDTOList = (List<UserDTO>) userService.findAll();
+        List<UserDO> userDTOList = (List<UserDO>) userService.findAll();
         System.out.println(userDTOList);
     }
 
@@ -26,5 +26,11 @@ public class UserServiceTest {
     public void existByIdTest(){
         boolean exist = userService.existById(11L);
         System.out.println("数据是否存在："+ exist);
+    }
+
+    @Test
+    public void findByIdTest(){
+        UserDO userDO = userService.findById(1L);
+        System.out.println(userDO);
     }
 }

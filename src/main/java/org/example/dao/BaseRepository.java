@@ -1,7 +1,7 @@
 package org.example.dao;
 
-import org.example.domain.BaseDTO;
+import org.example.domain.dos.BaseDO;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface BaseRepository<T extends BaseDTO, ID> extends JpaRepository<T, ID> {
+public interface BaseRepository<T extends BaseDO, ID> extends JpaRepository<T, ID> {
 }

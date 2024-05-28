@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.vos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import javax.validation.constraints.Pattern;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthLogReqVO {
+public class LoginVO {
 
     @NotEmpty(message = "登录账号不能为空")
     @Length(min = 4, max = 16, message = "账号长度为 4-16 位")

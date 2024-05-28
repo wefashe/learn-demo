@@ -3,6 +3,8 @@ package org.example.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.example.enums.ResponseEnum;
+
 import java.io.Serializable;
 
 /**

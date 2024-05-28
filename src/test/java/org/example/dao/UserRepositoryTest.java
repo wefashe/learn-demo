@@ -1,7 +1,7 @@
 package org.example.dao;
 
 
-import org.example.domain.UserDTO;
+import org.example.domain.dos.UserDO;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +19,9 @@ public class UserRepositoryTest {
 
     @Test
     public void addUserTest(){
-        UserDTO user = UserDTO.builder()
+        UserDO user = UserDO.builder()
                 .nickName("李元芳")
-                .username("wefashe11")
+                .username("wefashe12")
                 .password("sdsdhfks")
                 .email("yuanfang@qq.com")
                 .build();
@@ -31,11 +31,11 @@ public class UserRepositoryTest {
 
     @Test
     public void updateUserTest(){
-        List<UserDTO> userList = repository.findAll();
+        List<UserDO> userList = repository.findAll();
         if(userList == null || userList.size() == 0){
             return;
         }
-        UserDTO user = userList.get(0);
+        UserDO user = userList.get(0);
         user.setNickName(user.getNickName() + "-test");
         // 设置了id就是修改
         repository.save(user);

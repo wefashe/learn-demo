@@ -1,31 +1,29 @@
 package org.example.controller;
 
-import org.example.domain.AuthLogReqVO;
-import org.example.domain.UserDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.domain.dos.UserDO;
 import org.springframework.web.bind.annotation.*;
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("user")
-public class UserController {
+public class UserController extends BaseController<UserDO,Long> {
 
-    private static Logger logger = LoggerFactory.getLogger(UserController.class);
-
-    @GetMapping("/test")
-    public String test(){
-        return "成功";
+    /**
+     * 注册
+     * @return
+     */
+    @PostMapping("register")
+    public UserDO register(){
+        return new UserDO();
     }
 
-    @PostMapping("regist")
-    public UserDTO regist(UserDTO userDTO){
-        return userDTO;
-    }
 
-    @PostMapping("/login")
-    public String login(@RequestBody @Valid AuthLogReqVO reqVO){
-        return "成功";
+    /**
+     * 登录
+     * @return
+     */
+    @PostMapping("login")
+    public UserDO login(){
+        return new UserDO();
     }
 
 }

@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.enums;
 
 /**
  * 公共返回枚举

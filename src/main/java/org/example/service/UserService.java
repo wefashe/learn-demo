@@ -1,7 +1,7 @@
 package org.example.service;
 
-import org.example.domain.UserDTO;
+import org.example.domain.dos.UserDO;
 
-public interface UserService extends BaseService<UserDTO, Long> {
+public interface UserService extends BaseService<UserDO, Long> {
 
 }

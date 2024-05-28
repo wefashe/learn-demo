@@ -2,17 +2,20 @@ package org.example.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.dao.BaseRepository;
-import org.example.domain.BaseDTO;
+import org.example.domain.dos.BaseDO;
 import org.example.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.Objects;
 
 @Slf4j
-public abstract class BaseServiceImpl<T extends BaseDTO, ID> implements BaseService<T, ID> {
+@Service
+public abstract class BaseServiceImpl<T extends BaseDO, ID> implements BaseService<T, ID> {
 
     @Autowired
-    private BaseRepository<T, ID> repository;
+    protected BaseRepository<T, ID> repository;
 
     @Override
     public T findById(ID id) {
@@ -20,7 +23,7 @@ public abstract class BaseServiceImpl<T extends BaseDTO, ID> implements BaseServ
             log.error("id为空");
             return null;
         }
-        return repository.findById(id).get();
+        return repository.findById(id).orElse(null);
     }
 
     @Override

@@ -2,7 +2,7 @@ package org.example.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.example.domain.ResponseData;
-import org.example.domain.ResponseEnum;
+import org.example.enums.ResponseEnum;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.ObjectError;

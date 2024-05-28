@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.example.annotation.NoResponseBody;
 import org.example.domain.ResponseData;
-import org.example.domain.ResponseEnum;
+import org.example.enums.ResponseEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;

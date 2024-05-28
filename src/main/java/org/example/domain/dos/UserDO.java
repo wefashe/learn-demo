@@ -1,4 +1,4 @@
-package org.example.domain;
+package org.example.domain.dos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +16,9 @@ import java.io.Serializable;
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate // 只更新插入存在值的字段
-@Entity // user表名在h2中是关键字
+@Entity(name = "sys_user") // user表名在h2中是关键字
 @Builder
-public class UserDTO extends BaseDTO implements Serializable {
+public class UserDO extends BaseDO implements Serializable {
 
     @Column(nullable = false)
     private String nickName;
