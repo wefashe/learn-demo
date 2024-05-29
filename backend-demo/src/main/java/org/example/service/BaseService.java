@@ -2,7 +2,7 @@ package org.example.service;
 
 import org.example.domain.dos.BaseDO;
 
-public interface BaseService<T extends BaseDO, ID> {
+public interface BaseService<T extends BaseDO<ID>, ID extends Number> {
 
     /**
      * 通过单个ID获取单个数据

@@ -13,11 +13,10 @@ import javax.validation.constraints.NotNull;
 
 
 @Slf4j
-@RestController
-public abstract class BaseRestController<T extends BaseDO, ID> {
+public abstract class BaseRestController<M extends BaseService<T, ID>, T extends BaseDO<ID>, ID extends Number> {
 
     @Autowired
-    protected BaseService<T, ID> service;
+    protected M service;
 
     @PostMapping("add")
     public T add(@RequestBody @Validated(Add.class) T entity){

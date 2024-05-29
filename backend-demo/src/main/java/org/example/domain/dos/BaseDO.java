@@ -22,18 +22,18 @@ import java.util.Date;
 @MappedSuperclass//这个注解的意思是这个类jpa不会为它创建数据库表，
 @EntityListeners(AuditingEntityListener.class)//对实体属性变化的跟踪，它提供了保存前，保存后，更新前，
 // 更新后，删除前，删除后等状态，就像是拦截器一样，你可以在拦截方法里重写你的个性化逻辑。
-public abstract class BaseDO implements Serializable {
+public abstract class BaseDO<T extends Number> implements Serializable {
 
     @NotNull(message = "id不能为空", groups = Update.class)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false)
-    protected Long id;
+    protected T id;
 
     @JsonIgnore
     @CreatedBy
-    @Column(nullable = false, updatable = false)
-    protected Long createBy;
+    @Column(updatable = false)
+    protected T createBy;
 
     @JsonIgnore
     @CreatedDate
@@ -45,8 +45,8 @@ public abstract class BaseDO implements Serializable {
 
     @JsonIgnore
     @LastModifiedBy
-    @Column(nullable = false)
-    protected Long updateBy;
+    @Column
+    protected T updateBy;
 
     @JsonIgnore
     @LastModifiedDate

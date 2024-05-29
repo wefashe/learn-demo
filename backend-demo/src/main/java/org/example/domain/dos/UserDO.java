@@ -29,7 +29,7 @@ import java.io.Serializable;
 @Entity(name = "sys_user") // user表名在h2中是关键字
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class UserDO extends BaseDO implements Serializable {
+public class UserDO extends BaseDO<Long> implements Serializable {
 
     @Column(nullable = false)
     private String nickName;

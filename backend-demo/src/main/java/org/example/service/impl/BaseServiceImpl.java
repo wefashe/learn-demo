@@ -5,17 +5,15 @@ import org.example.dao.BaseRepository;
 import org.example.domain.dos.BaseDO;
 import org.example.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Objects;
 
 @Slf4j
-@Service
-public abstract class BaseServiceImpl<T extends BaseDO, ID> implements BaseService<T, ID> {
+public abstract class BaseServiceImpl<M extends BaseRepository<T, ID>, T extends BaseDO<ID>, ID extends Number> implements BaseService<T, ID> {
 
     @Autowired
-    protected BaseRepository<T, ID> repository;
+    protected M repository;
 
     @Override
     public T findById(ID id) {
