@@ -39,7 +39,7 @@ public abstract class BaseServiceImpl<M extends BaseRepository<T, ID>, T extends
     }
 
     @Override
-    public <S extends T> T add(T entity) {
+    public <S extends T> S add(S entity) {
         if (Objects.isNull(entity)) {
             log.error("新增数据为空");
             return null;
@@ -52,7 +52,7 @@ public abstract class BaseServiceImpl<M extends BaseRepository<T, ID>, T extends
     }
 
     @Override
-    public <S extends T> Iterable<T> add(Iterable<T> entities) {
+    public <S extends T> Iterable<S> add(Iterable<S> entities) {
         if (Objects.isNull(entities) || !entities.iterator().hasNext()) {
             log.error("新增数据为空");
             return Collections.EMPTY_LIST;
@@ -96,7 +96,7 @@ public abstract class BaseServiceImpl<M extends BaseRepository<T, ID>, T extends
     }
 
     @Override
-    public <S extends T> T update(T entity) {
+    public <S extends T> S update(S entity) {
         if (Objects.isNull(entity)) {
             log.error("修改数据为空");
             return null;
@@ -109,7 +109,7 @@ public abstract class BaseServiceImpl<M extends BaseRepository<T, ID>, T extends
     }
 
     @Override
-    public <S extends T> Iterable<T> update(Iterable<T> entities) {
+    public <S extends T> Iterable<S> update(Iterable<S> entities) {
         if (Objects.isNull(entities) || !entities.iterator().hasNext()) {
             log.error("修改数据为空");
             return Collections.EMPTY_LIST;

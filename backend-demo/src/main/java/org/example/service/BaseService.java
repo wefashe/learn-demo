@@ -30,7 +30,7 @@ public interface BaseService<T extends BaseDO<ID>, ID extends Number> {
      * @return 成功新增的数据
      * @param <S>
      */
-    <S extends T> T add(T entity);
+    <S extends T> S add(S entity);
 
     /**
      * 新增多个数据
@@ -38,7 +38,7 @@ public interface BaseService<T extends BaseDO<ID>, ID extends Number> {
      * @return 成功新增的数据
      * @param <S>
      */
-    <S extends T> Iterable<T> add(Iterable<T> entities);
+    <S extends T> Iterable<S> add(Iterable<S> entities);
 
     /**
      * 通过单个ID删除单个数据
@@ -66,7 +66,7 @@ public interface BaseService<T extends BaseDO<ID>, ID extends Number> {
      * @return 成功修改的数据
      * @param <S>
      */
-    <S extends T> T  update(T entity);
+    <S extends T> S update(S entity);
 
     /**
      * 修改多个数据
@@ -74,7 +74,7 @@ public interface BaseService<T extends BaseDO<ID>, ID extends Number> {
      * @return 成功修改的数据
      * @param <S>
      */
-    <S extends T> Iterable<T> update(Iterable<T> entities);
+    <S extends T> Iterable<S> update(Iterable<S> entities);
 
     /**
      * 获取所有数据个数
