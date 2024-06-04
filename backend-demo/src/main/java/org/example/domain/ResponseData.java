@@ -3,7 +3,9 @@ package org.example.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import org.example.constant.Constants;
 import org.example.enums.ResponseEnum;
+import org.slf4j.MDC;
 
 import java.io.Serializable;
 
@@ -18,6 +20,7 @@ public class ResponseData<T> implements Serializable {
     private Integer code;
     private String msg;
     private T data;
+    private String traceId =  MDC.get(Constants.TRACE_ID);
     private final long timestamp = System.currentTimeMillis();
 
     public ResponseData(Integer code, String msg){
