@@ -1,5 +1,6 @@
 package org.example.domain.dos;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,21 +13,20 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.Length;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
+import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate // 只更新插入存在值的字段
-@Entity(name = "sys_user") // user表名在h2中是关键字
+@Entity(name = "t_user") // user表名在h2中是关键字
 @Builder
 @EntityListeners(AuditingEntityListener.class)
 public class UserDO extends BaseDO<Long> implements Serializable {
@@ -49,4 +49,10 @@ public class UserDO extends BaseDO<Long> implements Serializable {
     @Email(message = "邮箱格式不对", groups = {register.class, Login.class, Update.class})
     @Column(nullable = false)
     private String email;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.MERGE)
+    @JoinTable(name = "t_user_role", joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<RoleDO> roles;
 }

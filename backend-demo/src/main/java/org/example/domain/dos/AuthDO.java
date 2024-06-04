@@ -1,5 +1,6 @@
 package org.example.domain.dos;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,12 +19,15 @@ import java.io.Serializable;
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Entity(name = "t_log")
+@Entity(name = "t_auth")
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class LogDO extends BaseDO<Long> implements Serializable {
+public class AuthDO extends BaseDO<Long> implements Serializable {
 
     @Column(nullable = false)
-    private Long userId;
+    private String code;
+
+    @Column(nullable = false)
+    private String name;
 
 }
