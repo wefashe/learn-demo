@@ -27,7 +27,7 @@ public class TraceIdInterceptor  implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        MDC.remove("TRACE_ID");
+        MDC.remove(Constants.TRACE_ID);
         HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
     }
 }
