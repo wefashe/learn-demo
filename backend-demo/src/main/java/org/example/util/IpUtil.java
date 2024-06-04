@@ -9,8 +9,6 @@ import java.util.Enumeration;
 @Slf4j
 public class IpUtil {
 
-    private static final String LOCAL_IP = "127.0.0.1";
-
     /**
      * 获取IP地址
      *
@@ -38,7 +36,7 @@ public class IpUtil {
         if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
-        return "0:0:0:0:0:0:0:1".equals(ip) ? LOCAL_IP : ip;
+        return "0:0:0:0:0:0:0:1".equals(ip) ? "127.0.0.1" : ip;
     }
 
     public static String getLocalIP() {
