@@ -15,10 +15,12 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.CharsetUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
+@Slf4j
 public class WebSocketClient {
     private URI uri;
     private EventLoopGroup group;
@@ -76,7 +78,7 @@ public class WebSocketClient {
                         }
                         pipeline.addLast(new HttpClientCodec());
                         pipeline.addLast(new HttpObjectAggregator(8192));
-                        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+                        // pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                         pipeline.addLast(webSocketHandler);
                     }
                 });
@@ -84,18 +86,18 @@ public class WebSocketClient {
         ChannelFuture future = b.connect(uri.getHost(), uri.getPort()).sync();
         future.addListener((ChannelFutureListener) connectFuture -> {
             if (connectFuture.isSuccess()) {
-                System.out.println("连接建立成功！");
+                log.debug("连接建立成功！");
                 this.channel = connectFuture.channel();
                 webSocketHandler.handshakeFuture().addListeners((ChannelFutureListener) handshakeFuture -> {
                     if (handshakeFuture.isSuccess()) {
-                        System.out.println("握手成功!");
+                        log.debug("握手成功!");
                         send(authMessage, 7);
                     } else {
-                        System.out.println("握手失败!");
+                        log.error("握手失败!");
                     }
                 });
             } else {
-                System.out.println("连接建立失败");
+                log.error("连接建立失败");
                 connectFuture.cause().printStackTrace();
             }
         });
@@ -125,12 +127,12 @@ public class WebSocketClient {
     public void send(String data, int op) {
         if (this.channel != null && this.channel.isOpen()) {
             ByteBuf packet = createPacket(data, op);
-            channel.writeAndFlush(new BinaryWebSocketFrame(packet)).addListener(future -> {
-                if (future.isSuccess()) {
-                    System.out.println("Sent message: " + data);
+            channel.writeAndFlush(new BinaryWebSocketFrame(packet)).addListener(messageFuture -> {
+                if (messageFuture.isSuccess()) {
+                    log.debug("消息发送成功: {}", data);
                 } else {
-                    System.err.println("Failed to send message");
-                    future.cause().printStackTrace();
+                    log.error("消息发送失败");
+                    messageFuture.cause().printStackTrace();
                 }
             });
         }
