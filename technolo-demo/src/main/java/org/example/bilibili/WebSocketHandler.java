@@ -4,6 +4,7 @@ import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -17,7 +18,9 @@ import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.zip.Inflater;
 
@@ -66,8 +69,13 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
-    private void processBinaryFrame(ByteBuf content) {
-        //
+    private void processBinaryFrame(ByteBuf content) throws IOException {
+        if (content.readableBytes() < 16) {
+            return;
+        }
+
+        content.markReaderIndex();
+
         int packetLength = content.readInt();
         // 响应头长度
         int headerLength = content.readShort();
@@ -78,6 +86,12 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         // 序号
         int sequence = content.readInt();
 
+
+        if (content.readableBytes() < packetLength - 16) {
+            content.resetReaderIndex();
+            return;
+        }
+
         // 协议版本:
         // 0普通包正文不使用压缩
         // 1心跳及认证包正文不使用压缩
@@ -85,6 +99,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         // 3普通包正文使用brotli压缩,解压为一个带头部的协议0普通包
 
         ByteBuf data = content.readSlice(packetLength - headerLength);
+
         if (protocolVersion == 2) {
             ByteBuf uncompressed = Unpooled.wrappedBuffer(decompress(data));
             processBinaryFrame(uncompressed);
@@ -104,6 +119,22 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
                 log.info("下播的直播间列表：{}",danmu.getJSONObject("data").getJSONArray("room_id_list"));
             }
         } else {
+            // 解压Brotli压缩的正文
+            // byte[] body = new byte[packetLength - 16];
+            // content.readBytes(body);
+            byte[] byteArray = new byte[data.readableBytes()];
+            data.readBytes(byteArray);
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
+            BrotliInputStream brotliInputStream = new BrotliInputStream(bais);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = brotliInputStream.read(buffer)) != -1) {
+                baos.write(buffer, 0, length);
+            }
+            log.info(new String(baos.toByteArray()));
+
             System.out.println("Unknown protocol version: " + protocolVersion);
         }
     }
