@@ -10,6 +10,10 @@ import io.netty.util.internal.logging.InternalLoggerFactory;
 import io.netty.util.internal.logging.Slf4JLoggerFactory;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 参考项目
+ * https://github.com/OrdinaryRoad-Project/ordinaryroad-live-chat-client.git
+ */
 @Slf4j
 public class Test {
     public static void main(String[] args) throws Exception {
