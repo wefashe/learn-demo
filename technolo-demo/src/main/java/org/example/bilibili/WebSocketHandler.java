@@ -149,6 +149,10 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
                         case DANMU_MSG:
                             System.out.println(StrUtil.format("{}: {}", obj.getJSONArray("info").get(2, JSONArray.class).get(1, String.class), obj.getJSONArray("info").get(1)));
                             break;
+                        case DM_INTERACTION:
+                            System.out.println(jsonStr);
+                            System.out.println(StrUtil.format("{}{}", obj.getJSONObject("data").getJSONObject("data").getInt("cnt"),obj.getJSONObject("data").getJSONObject("data").getInt("suffix_text")));
+                            break;
                         default:
                             System.out.println(jsonStr);
                             break;
