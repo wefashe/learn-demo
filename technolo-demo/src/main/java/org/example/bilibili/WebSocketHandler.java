@@ -1,9 +1,12 @@
 package org.example.bilibili;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.GlobalHeaders;
 import cn.hutool.http.Header;
+import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.aayushatharva.brotli4j.Brotli4jLoader;
 import com.aayushatharva.brotli4j.decoder.BrotliInputStream;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -19,9 +22,7 @@ import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.zip.Inflater;
 
 @Slf4j
@@ -63,9 +64,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
             System.out.println("Received: " + frame.text());
         } else if (msg instanceof BinaryWebSocketFrame) {
             BinaryWebSocketFrame frame = (BinaryWebSocketFrame) msg;
-            log.debug("服务器接收到二进制消息,消息长度:[{}]", frame.content().capacity());
-            ByteBuf content = frame.content();
-            processBinaryFrame(content);
+            processBinaryFrame( frame.content());
         }
     }
 
@@ -73,84 +72,102 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         if (content.readableBytes() < 16) {
             return;
         }
-
-        content.markReaderIndex();
-
         int packetLength = content.readInt();
         // 响应头长度
         int headerLength = content.readShort();
         // 协议版本
-        int protocolVersion = content.readShort();
+        int protoverCode = content.readShort();
         // 操作
-        int operation = content.readInt();
+        int operationCode = content.readInt();
         // 序号
         int sequence = content.readInt();
 
+        int dataLength = packetLength - headerLength;
+        ByteBuf data = content.readSlice(dataLength);
 
-        if (content.readableBytes() < packetLength - 16) {
-            content.resetReaderIndex();
-            return;
+        ProtoverEnum protoverEnum = ProtoverEnum.getByCode(protoverCode);
+        OperationEnum operationEnum = OperationEnum.getByCode(operationCode);
+
+        if (protoverEnum == null) {
+            log.warn(StrUtil.format("未知的协议版本: {}", protoverCode));
         }
 
-        // 协议版本:
-        // 0普通包正文不使用压缩
-        // 1心跳及认证包正文不使用压缩
-        // 2普通包正文使用zlib压缩
-        // 3普通包正文使用brotli压缩,解压为一个带头部的协议0普通包
-
-        ByteBuf data = content.readSlice(packetLength - headerLength);
-
-        if (protocolVersion == 2) {
-            ByteBuf uncompressed = Unpooled.wrappedBuffer(decompress(data));
-            processBinaryFrame(uncompressed);
-        } else if (protocolVersion == 0 || protocolVersion == 1) {
-            String jsonStr = data.toString(CharsetUtil.UTF_8);
-            System.out.println("Received danmaku: " + jsonStr);
-            JSONObject danmu = JSONUtil.parseObj(jsonStr);
-            String cmd = danmu.getStr("cmd");
-            if (!danmu.isNull("code")) {
-                if (0 == danmu.getInt("code")) {
-                    log.info("认证成功");
+        if (operationEnum == null) {
+            log.warn(StrUtil.format("未知的操作编号: {}", protoverCode));
+        }
+        String jsonStr = data.toString(CharsetUtil.UTF_8);
+        switch (operationEnum) {
+            case HEARTBEAT_REPLY:
+                System.out.println("心跳回复");
+                break;
+            case CONNECT_SUCCESS: {
+                JSONObject obj = JSONUtil.parseObj(jsonStr);
+                if ("0".equals(obj.getStr("code"))) {
+                    log.debug("认证成功!");
                 }
+                break;
             }
-            if ("NOTICE_MSG".equals(cmd)) {
-                log.info("通知消息：{}",danmu.getStr("msg_common"));
-            } else if ("STOP_LIVE_ROOM_LIST".equals(cmd)) {
-                log.info("下播的直播间列表：{}",danmu.getJSONObject("data").getJSONArray("room_id_list"));
+            case MESSAGE: {
+                if (protoverEnum == ProtoverEnum.NORMAL_ZLIB) {
+                    processBinaryFrame(decompressZlib(data));
+                } else if (protoverEnum == ProtoverEnum.NORMAL_BROTLI) {
+                    processBinaryFrame(decompressBrotli(data));
+                } else {
+                    JSONObject obj = JSONUtil.parseObj(jsonStr);
+                    CmdMsgEnum cmdMsgEnum = CmdMsgEnum.getByString(obj.getStr("cmd"));
+                    switch (cmdMsgEnum) {
+                        case INTERACT_WORD:
+                            System.out.println(StrUtil.format("{}进入直播间", obj.getJSONObject("data").getStr("uname")));
+                            break;
+                        case WATCHED_CHANGE:
+                            System.out.println(StrUtil.format("看过人数刷新: {}人看过", obj.getJSONObject("data").getStr("num")));
+                            break;
+                        case LIKE_INFO_V3_UPDATE:
+                            System.out.println(StrUtil.format("点赞人数刷新: {}人点赞", obj.getJSONObject("data").getStr("click_count")));
+                            break;
+                        case LIKE_INFO_V3_CLICK:
+                            System.out.println(StrUtil.format("{}{}", obj.getJSONObject("data").getStr("uname"), obj.getJSONObject("data").getStr("like_text")));
+                            break;
+                        case ONLINE_RANK_V2:
+                            System.out.println(StrUtil.format("高能用户刷新: {}个高能", obj.getJSONObject("data").getJSONArray("list").size()));
+                            break;
+                        case ONLINE_RANK_COUNT:
+                            System.out.println(StrUtil.format("高能用户: {}", obj.getJSONObject("data").getStr("count")));
+                            break;
+                        case ROOM_REAL_TIME_MESSAGE_UPDATE:
+                            System.out.println(StrUtil.format("当前粉丝数: {}, 粉丝团人数: {}", obj.getJSONObject("data").getStr("fans"), obj.getJSONObject("data").getStr("fans_club")));
+                            break;
+                        case STOP_LIVE_ROOM_LIST:
+                            System.out.println(StrUtil.format("当前下播直播间数: {}", obj.getJSONObject("data").getJSONArray("room_id_list").size()));
+                            break;
+                        case DANMU_MSG:
+                            System.out.println(StrUtil.format("{}: {}", obj.getJSONArray("info").get(2, JSONArray.class).get(1, String.class), obj.getJSONArray("info").get(1)));
+                            break;
+                        default:
+                            System.out.println(jsonStr);
+                            break;
+                    }
+                }
+                break;
             }
-        } else {
-            // 解压Brotli压缩的正文
-            // byte[] body = new byte[packetLength - 16];
-            // content.readBytes(body);
-            byte[] byteArray = new byte[data.readableBytes()];
-            data.readBytes(byteArray);
-
-            ByteArrayInputStream bais = new ByteArrayInputStream(byteArray);
-            BrotliInputStream brotliInputStream = new BrotliInputStream(bais);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = brotliInputStream.read(buffer)) != -1) {
-                baos.write(buffer, 0, length);
-            }
-            log.info(new String(baos.toByteArray()));
-
-            System.out.println("Unknown protocol version: " + protocolVersion);
+            default:
+                System.out.println(jsonStr);
+                break;
         }
     }
 
-    public static byte[] decompress(ByteBuf data) {
+    public static ByteBuf decompressZlib(ByteBuf data) {
         Inflater inflater = new Inflater();
         inflater.setInput(data.array(), data.arrayOffset() + data.readerIndex(), data.readableBytes());
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.readableBytes());
-        byte[] buffer = new byte[1024];
+        ByteBuf buffer = Unpooled.buffer(data.readableBytes());
+        byte[] bytes = new byte[1024];
         try {
             while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                outputStream.write(buffer, 0, count);
+                int count = inflater.inflate(bytes);
+                buffer.writeBytes(bytes, 0, count);
             }
-            return outputStream.toByteArray();
+            return buffer;
         } catch (Exception e) {
             throw new RuntimeException("Failed to decompress zlib data", e);
         } finally {
@@ -158,6 +175,28 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         }
     }
 
+
+    public static ByteBuf decompressBrotli(ByteBuf data) {
+        try {
+            byte[] inputBytes = new byte[data.readableBytes()];
+            data.readBytes(inputBytes);
+            Brotli4jLoader.ensureAvailability();
+
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(inputBytes);
+            ByteBuf buffer = Unpooled.buffer(data.readableBytes());
+
+            byte[] bytes = new byte[1024];
+            BrotliInputStream brotliInputStream = new BrotliInputStream(byteArrayInputStream);;
+            int count;
+            while ((count = brotliInputStream.read(bytes)) > -1) {
+                buffer.writeBytes(bytes, 0, count);
+            }
+            byteArrayInputStream.close();
+            return buffer;
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to decompress Brotli data", e);
+        }
+    }
 
     @Override
     public void handlerAdded(ChannelHandlerContext ctx) throws Exception {

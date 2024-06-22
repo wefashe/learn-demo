@@ -2,6 +2,7 @@ package org.example.bilibili;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
@@ -18,8 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 public class Test {
     public static void main(String[] args) throws Exception {
         // https://api.live.bilibili.com/room/v3/area/getRoomList
-        String userId = "392836434";
-        String api = "https://api.live.bilibili.com/room/v1/Room/getRoomInfoOld?mid=" + userId;
+        String userId = "3546688562137591";
+        String api = StrUtil.format("https://api.live.bilibili.com/room/v1/Room/getRoomInfoOld?mid={}", userId);
         String jsonStr = HttpUtil.get(api, CharsetUtil.CHARSET_UTF_8);
         JSONObject dataObj = JSONUtil.parseObj(jsonStr).getJSONObject("data");
         log.info("直播间标题：{}", dataObj.getStr("title"));
@@ -32,7 +33,7 @@ public class Test {
             log.info("直播间状态：已开播");
         }
         int roomId = dataObj.getInt("roomid");
-        api = "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=" + roomId + "&type=0";
+        api = StrUtil.format("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id={}&type=0",roomId);
         jsonStr = HttpUtil.get(api, CharsetUtil.CHARSET_UTF_8);
         dataObj = JSONUtil.parseObj(jsonStr).getJSONObject("data");
         String token = dataObj.getStr("token");
@@ -43,8 +44,8 @@ public class Test {
         jsonStr = HttpUtil.get(api, CharsetUtil.CHARSET_UTF_8);
         String buvid3 = JSONUtil.parseObj(jsonStr).getJSONObject("data").getStr("b_3");
 
-        String wss = "wss://" + hostObj.getStr("host") + ":" + hostObj.getInt("wss_port") + "/sub";
-        String ws = "ws://" + hostObj.getStr("host") + ":" + hostObj.getInt("ws_port") + "/sub";
+        String wss = StrUtil.format("wss://{}:{}/sub",hostObj.getStr("host") , hostObj.getInt("wss_port"));
+        String ws = StrUtil.format("ws://{}:{}/sub",hostObj.getStr("host") , hostObj.getInt("ws_port"));
 
         JSONObject authObj = JSONUtil.createObj()
                 .set("uid", 0)
