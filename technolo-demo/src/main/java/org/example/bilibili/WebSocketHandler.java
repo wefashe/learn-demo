@@ -98,7 +98,13 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         String jsonStr = data.toString(CharsetUtil.UTF_8);
         switch (operationEnum) {
             case HEARTBEAT_REPLY:
-                System.out.println("心跳回复");
+                // 正文分为两个部分，第一部分是人气值 [uint32整数，代表房间当前的人气值]
+                // 第二部分是对于心跳包内容的复制，心跳包正文是什么这里就会回应什么
+                System.out.println("心跳回复,人气: "+ data.readInt());
+                // 读取剩余的所有内容
+                byte[] body = new byte[content.readableBytes()];
+                content.readBytes(body);
+                System.out.println(new String(body, CharsetUtil.UTF_8));
                 break;
             case CONNECT_SUCCESS: {
                 JSONObject obj = JSONUtil.parseObj(jsonStr);
@@ -210,7 +216,7 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("WebSocket Client disconnected!");
+        System.out.println("连接断开");
     }
 
     @Override

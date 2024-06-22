@@ -58,9 +58,6 @@ public class Test {
         // System.out.println(authObj.toStringPretty());
         InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE);
         WebSocketClient client = new WebSocketClient(wss, authObj.toString());
-
         client.connect();
-        Thread.sleep(60000);
-        client.close();
     }
 }
