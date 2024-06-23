@@ -19,14 +19,14 @@ import lombok.extern.slf4j.Slf4j;
 public class Test {
     public static void main(String[] args) throws Exception {
         // https://api.live.bilibili.com/room/v3/area/getRoomList
-        String userId = "3546688562137591";
+        String userId = "630900036";
         String api = StrUtil.format("https://api.live.bilibili.com/room/v1/Room/getRoomInfoOld?mid={}", userId);
         String jsonStr = HttpUtil.get(api, CharsetUtil.CHARSET_UTF_8);
         JSONObject dataObj = JSONUtil.parseObj(jsonStr).getJSONObject("data");
         log.info("直播间标题：{}", dataObj.getStr("title"));
         log.info("直播间地址：{}", dataObj.getStr("url"));
-        String liveStatus = dataObj.getStr("liveStatus");
-        if ("0".equals(liveStatus)) {
+        LiveStatusEnum status = LiveStatusEnum.getByCode(dataObj.getInt("liveStatus"));
+        if (status == LiveStatusEnum.STOPPED) {
             log.info("直播间状态：未开播");
             return;
         } else {

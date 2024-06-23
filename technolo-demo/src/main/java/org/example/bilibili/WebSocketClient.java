@@ -106,43 +106,10 @@ public class WebSocketClient {
         });
     }
 
-
-    public ByteBuf createPacket(String data, OperationEnum operationEnum, ProtoverEnum protoverEnum) {
-
-        int sequence = 0;
-        final short HEADER_LENGTH = 16;
-
-//        String jsonStr = StrUtil.EMPTY;
-        String jsonStr = "hello w";
-        // HeartbeatMsg不需要正文，如果序列化后得到`{}`，则替换为空字符串
-        if (operationEnum != OperationEnum.HEARTBEAT) {
-            jsonStr = data;
-            if (StrUtil.EMPTY_JSON.equals(jsonStr)) {
-                jsonStr = StrUtil.EMPTY;
-            }
-        }
-
-        byte[] body = jsonStr.getBytes(CharsetUtil.UTF_8);
-        int totalLength = HEADER_LENGTH + body.length;
-        ByteBuf buffer = Unpooled.buffer(totalLength);
-        // 封包总大小（头部大小+正文大小）
-        buffer.writeInt(totalLength);
-        // 头部大小（一般为0x0010，16字节）
-        buffer.writeShort(HEADER_LENGTH);
-        // 协议版本
-        buffer.writeShort(protoverEnum.getCode());
-        // 操作码
-        buffer.writeInt(operationEnum.getCode());
-        // sequence，每次发包时向上递增
-        buffer.writeInt(++sequence);
-        // 正文数据
-        buffer.writeBytes(body);
-        return buffer;
-    }
-
     public void sendAuthRequest() {
         if (this.channel != null && this.channel.isActive()) {
-            ByteBuf packet = createPacket(this.authMessage, OperationEnum.USER_AUTHENTICATION, ProtoverEnum.HEARTBEAT_AUTH_NO_COMPRESSION);
+            MsgObject msg = new MsgObject(ProtocolEnum.HEARTBEAT_AUTH_NO_COMPRESSION, OperationEnum.USER_AUTHENTICATION, this.authMessage);
+            ByteBuf packet = MessageCodecUtil.encode(msg);
             log.debug("发送认证包");
             channel.writeAndFlush(new BinaryWebSocketFrame(packet)).addListener(messageFuture -> {
                 if (messageFuture.isSuccess()) {
@@ -159,7 +126,8 @@ public class WebSocketClient {
         if (this.channel != null && this.channel.isActive()) {
             channel.eventLoop().scheduleAtFixedRate(() -> {
                 if (channel.isActive()) {
-                    ByteBuf packet = createPacket("", OperationEnum.HEARTBEAT, ProtoverEnum.HEARTBEAT_AUTH_NO_COMPRESSION);
+                    MsgObject msg = new MsgObject(ProtocolEnum.HEARTBEAT_AUTH_NO_COMPRESSION, OperationEnum.HEARTBEAT, StrUtil.EMPTY);
+                    ByteBuf packet = MessageCodecUtil.encode(msg);
                     log.debug("发送心跳包");
                     channel.writeAndFlush(new BinaryWebSocketFrame(packet)).addListener(messageFuture -> {
                         if (messageFuture.isSuccess()) {
@@ -174,14 +142,14 @@ public class WebSocketClient {
         }
     }
 
-    public void send(String data, OperationEnum operationEnum, ProtoverEnum protoverEnum) {
+    public void send(MsgObject msg) {
         if (this.channel != null && this.channel.isActive()) {
-            ByteBuf packet = createPacket(data, operationEnum,protoverEnum);
+            ByteBuf packet = MessageCodecUtil.encode(msg);
             channel.writeAndFlush(new BinaryWebSocketFrame(packet)).addListener(messageFuture -> {
                 if (messageFuture.isSuccess()) {
-                    log.debug("消息发送成功: {}", data);
+                    log.debug("消息发送成功");
                 } else {
-                    log.error("消息发送失败");
+                    log.error("消息发送失败", messageFuture.cause());
                     messageFuture.cause().printStackTrace();
                 }
             });

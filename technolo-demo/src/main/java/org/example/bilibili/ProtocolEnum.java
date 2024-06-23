@@ -3,7 +3,7 @@ package org.example.bilibili;
 /**
  * 协议版本
  */
-public enum ProtoverEnum {
+public enum ProtocolEnum {
 
     /**
      * 普通包正文不使用压缩
@@ -25,7 +25,7 @@ public enum ProtoverEnum {
 
     private final int code;
 
-    ProtoverEnum(int code) {
+    ProtocolEnum(int code) {
         this.code = code;
     }
 
@@ -33,8 +33,8 @@ public enum ProtoverEnum {
         return code;
     }
 
-    public static ProtoverEnum getByCode(int code) {
-        for (ProtoverEnum value : ProtoverEnum.values()) {
+    public static ProtocolEnum getByCode(int code) {
+        for (ProtocolEnum value : ProtocolEnum.values()) {
             if (value.code == code) {
                 return value;
             }

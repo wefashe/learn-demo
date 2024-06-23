@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.zip.Inflater;
 
 @Slf4j
@@ -64,7 +65,12 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
             System.out.println("Received: " + frame.text());
         } else if (msg instanceof BinaryWebSocketFrame) {
             BinaryWebSocketFrame frame = (BinaryWebSocketFrame) msg;
-            processBinaryFrame( frame.content());
+            List<MsgObject> msgList = MessageCodecUtil.decode(frame.content());
+            for (MsgObject obj : msgList) {
+                System.out.println(new String(obj.getDataBytes(), CharsetUtil.UTF_8));
+            }
+
+//            processBinaryFrame( frame.content());
         }
     }
 
@@ -85,10 +91,10 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         int dataLength = packetLength - headerLength;
         ByteBuf data = content.readSlice(dataLength);
 
-        ProtoverEnum protoverEnum = ProtoverEnum.getByCode(protoverCode);
+        ProtocolEnum protocolEnum = ProtocolEnum.getByCode(protoverCode);
         OperationEnum operationEnum = OperationEnum.getByCode(operationCode);
 
-        if (protoverEnum == null) {
+        if (protocolEnum == null) {
             log.warn(StrUtil.format("未知的协议版本: {}", protoverCode));
         }
 
@@ -114,9 +120,9 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
                 break;
             }
             case MESSAGE: {
-                if (protoverEnum == ProtoverEnum.NORMAL_ZLIB) {
+                if (protocolEnum == ProtocolEnum.NORMAL_ZLIB) {
                     processBinaryFrame(decompressZlib(data));
-                } else if (protoverEnum == ProtoverEnum.NORMAL_BROTLI) {
+                } else if (protocolEnum == ProtocolEnum.NORMAL_BROTLI) {
                     processBinaryFrame(decompressBrotli(data));
                 } else {
                     JSONObject obj = JSONUtil.parseObj(jsonStr);

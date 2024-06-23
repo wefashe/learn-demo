@@ -1,5 +1,8 @@
 package org.example.bilibili;
 
+/**
+ * 封包类型
+ */
 public enum OperationEnum {
     /**
      * 心跳包
