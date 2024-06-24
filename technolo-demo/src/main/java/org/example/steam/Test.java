@@ -6,6 +6,8 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import io.netty.util.internal.logging.InternalLoggerFactory;
+import io.netty.util.internal.logging.Slf4JLoggerFactory;
 
 import java.util.Comparator;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Test {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         String url = "https://api.steampowered.com/ISteamDirectory/GetCMListForConnect/v0001/?cellid=0&format=js";
         String result = HttpRequest.get(url)
                 .header(Header.USER_AGENT, "user-agent")
@@ -37,5 +39,8 @@ public class Test {
 
         String wss = StrUtil.format("wss://{}/cmsocket/", cm.getStr("endpoint"));
         System.out.println(wss);
+        InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE);
+        WebSocketClient client = new WebSocketClient(wss);
+        client.connect();
     }
 }
