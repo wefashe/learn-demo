@@ -1,6 +1,7 @@
 package org.example.steam;
 
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -9,6 +10,7 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import lombok.extern.slf4j.Slf4j;
+import org.example.steam.codec.SteammessagesBase;
 
 
 @Slf4j
@@ -45,6 +47,20 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
             System.out.println("Received: " + frame.text());
         } else if (msg instanceof BinaryWebSocketFrame) {
             BinaryWebSocketFrame frame = (BinaryWebSocketFrame) msg;
+            ByteBuf content = frame.content();
+            int rawEmsg = content.readIntLE();
+            int hdrLength = content.readIntLE();
+
+            ByteBuf hdrBuf = content.readSlice(hdrLength);
+            ByteBuf msgBody = content.slice(content.readerIndex(), content.readableBytes() - content.readerIndex());
+
+            int PROTO_MASK = 0x80000000;
+            // 检查消息是否是ProtoBuf类型
+            if ((rawEmsg & PROTO_MASK) == 0) {
+                throw new IllegalArgumentException("Received unexpected non-protobuf message " + rawEmsg);
+            }
+
+            SteammessagesBase.CMsgProtoBufHeader protoBufHeader = SteammessagesBase.CMsgProtoBufHeader.parseFrom(hdrBuf.nioBuffer());
 
         }
     }
