@@ -8,22 +8,22 @@ import java.util.Map;
 public class Constant {
     public static Map<String, Object> map = new HashMap<>();
 
-    public static List<Long> getJobs(){
-        List<Long> jobs = (List<Long>) map.get("job");
+    public static Map<Long, String> getJobs(){
+        Map<Long, String> jobs = (Map<Long, String>) map.get("job");
         if (jobs == null) {
-            jobs = new ArrayList<>();
+            jobs = new HashMap<>();
             map.put("job", jobs);
         }
         return jobs;
     }
 
-    public static void setJobs(long id){
-        List<Long> jobs = (List<Long>) map.get("job");
+    public static void setJobs(long id, String refreshToken){
+        Map<Long, String> jobs = (Map<Long, String>) map.get("job");
         if (jobs == null) {
-            jobs = new ArrayList<>();
+            jobs = new HashMap<>();
             map.put("job", jobs);
         }
-        jobs.add(id);
+        jobs.put(id, refreshToken);
     }
 
     public static Integer getClientSessionid(){

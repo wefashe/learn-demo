@@ -1,7 +1,5 @@
 package org.example.steam;
 
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,6 +9,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -62,8 +63,8 @@ public class WebSocketClient {
                         }
                         pipeline.addLast(new HttpClientCodec());
                         pipeline.addLast(new HttpObjectAggregator(8192));
-                        // pipeline.addLast(WebSocketClientCompressionHandler.INSTANCE);
-                        // pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+                        pipeline.addLast(WebSocketClientCompressionHandler.INSTANCE);
+                        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                         pipeline.addLast(webSocketHandler);
                     }
                 });
@@ -110,7 +111,7 @@ public class WebSocketClient {
         SteammessagesClientserverLogin.CMsgClientHello.Builder helloBuilder = SteammessagesClientserverLogin.CMsgClientHello.newBuilder();
         helloBuilder.setProtocolVersion(PROTOCOL_VERSION);
         byte[] body = helloBuilder.build().toByteArray();
-        sendMessage(EMsg.ClientHello, body);
+        sendMessage(EMsg.ClientHello, body, null);
     }
 
     public void sendMessage(String refreshToken){
@@ -119,10 +120,10 @@ public class WebSocketClient {
         builder.setSteamid(TokenUtil.decodeToken(refreshToken).getLong("sub"));
         builder.setRenewalType(SteammessagesAuthSteamclient.ETokenRenewalType.k_ETokenRenewalType_None);
         byte[] body = builder.build().toByteArray();
-        sendMessage(EMsg.ServiceMethodCallFromClientNonAuthed, body);
+        sendMessage(EMsg.ServiceMethodCallFromClientNonAuthed, body, refreshToken);
     }
 
-    public void sendMessage(EMsg eMsg, byte[] body){
+    public void sendMessage(EMsg eMsg, byte[] body, String refreshToken){
         SteammessagesBase.CMsgProtoBufHeader.Builder protoHeader = SteammessagesBase.CMsgProtoBufHeader.newBuilder();
         protoHeader.setSteamid(0);
         if (eMsg != EMsg.ServiceMethodCallFromClientNonAuthed) {
@@ -137,7 +138,7 @@ public class WebSocketClient {
             // 确保生成的是正数
             jobIdBuffer[0] &= 0x7F;
             long jobId = new BigInteger(1, jobIdBuffer).longValue();
-            Constant.setJobs(jobId);
+            Constant.setJobs(jobId, refreshToken);
             protoHeader.setJobidSource(jobId);
             protoHeader.setTargetJobName("Authentication.GenerateAccessTokenForApp#1");
             protoHeader.setRealm(1);

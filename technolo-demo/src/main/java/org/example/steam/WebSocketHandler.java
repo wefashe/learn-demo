@@ -55,10 +55,9 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         }  else if (msg instanceof BinaryWebSocketFrame) {
             BinaryWebSocketFrame frame = (BinaryWebSocketFrame) msg;
             ByteBuf content = frame.content();
-            System.out.println("消息返回");
             handleMessage(content);
         } else {
-            System.out.println("其他类型" + msg.getClass());
+            log.warn("其他类型{}", msg.getClass());
         }
     }
 
@@ -85,30 +84,34 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
             Constant.setClientSessionid(protoBufHeader.getClientSessionid());
         }
 
-        int eMsg = (int) (rawEmsg & ~PROTO_MASK);
-        if (eMsg != EMsg.Multi.getCode()) {
-            System.out.printf("Receive: %s (%s)%n", EMsg.forNumber(eMsg), protoBufHeader.getTargetJobName());
+        EMsg eMsg = EMsg.forNumber((int) (rawEmsg & ~PROTO_MASK));
+        if (eMsg != EMsg.Multi) {
+            log.debug("返回消息类型: {} ({})", eMsg, protoBufHeader.getTargetJobName());
         }
-        if (Constant.getJobs().contains(protoBufHeader.getJobidTarget())) {
-            Constant.getJobs().remove(protoBufHeader.getJobidTarget());
-            int result = protoBufHeader.getEresult();
-            if (EResult.forNumber(result) != EResult.OK) {
+        if (Constant.getJobs().containsKey(protoBufHeader.getJobidTarget())) {
+            EResult result = EResult.forNumber(protoBufHeader.getEresult());
+            if (result != EResult.OK) {
                 String errorMessage = protoBufHeader.getErrorMessage();
-                System.out.println(result + ":" + errorMessage);
+                log.error("返回错误消息: {} ({})", result, errorMessage);
             } else {
                 SteammessagesAuthSteamclient.CAuthentication_AccessToken_GenerateForApp_Response response =
                         SteammessagesAuthSteamclient.CAuthentication_AccessToken_GenerateForApp_Response.parseFrom(msgBody.nioBuffer());
-                System.out.println("refreshToken: "+response.getRefreshToken());
-                System.out.println("accessToken: "+response.getAccessToken());
-                System.out.println("cookie: " + URLUtil.encode(StrUtil.format("steamLoginSecure={}||{}",
-                        TokenUtil.decodeToken(response.getAccessToken()).getLong("sub"), response.getAccessToken())));
-
-
+                String refreshToken = response.getRefreshToken();
+                if (StrUtil.isBlankIfStr(refreshToken)) {
+                    refreshToken = Constant.getJobs().get(protoBufHeader.getJobidTarget());
+                }
+                log.info("refreshToken: {}", refreshToken);
+                String accessToken = response.getAccessToken();
+                String cookie = URLUtil.encode(StrUtil.format("steamLoginSecure={}||{}",
+                        TokenUtil.decodeToken(response.getAccessToken()).getLong("sub"), response.getAccessToken()));
+                log.info("accessToken: {}", accessToken);
+                log.info("cookie: {}", cookie);
             }
+            Constant.getJobs().remove(protoBufHeader.getJobidTarget());
             return;
         }
         // 这不是一个响应消息，所以需要确定它是什么类型的消息
-        switch (EMsg.forNumber(eMsg)) {
+        switch (eMsg) {
             case ClientLogOnResponse:
                 SteammessagesClientserverLogin.CMsgClientLogonResponse logonResponse = SteammessagesClientserverLogin.CMsgClientLogonResponse.parseFrom(msgBody.nioBuffer());
                 System.out.printf("Received ClientLogOnResponse with result: %s%n", logonResponse.getEresult());
