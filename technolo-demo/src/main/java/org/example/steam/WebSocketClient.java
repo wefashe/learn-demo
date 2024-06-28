@@ -11,8 +11,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -65,7 +63,7 @@ public class WebSocketClient {
                         pipeline.addLast(new HttpClientCodec());
                         pipeline.addLast(new HttpObjectAggregator(8192));
                         // pipeline.addLast(WebSocketClientCompressionHandler.INSTANCE);
-                        pipeline.addLast(new LoggingHandler(LogLevel.INFO));
+                        // pipeline.addLast(new LoggingHandler(LogLevel.INFO));
                         pipeline.addLast(webSocketHandler);
                     }
                 });
@@ -97,8 +95,13 @@ public class WebSocketClient {
     private void sendAuthRequest() {
         if (this.channel != null && this.channel.isActive()) {
            sendClientHello();
-          	String refreshToken = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInN0ZWFtIiwgInN1YiI6ICI3NjU2MTE5OTY5Nzc1MTI1MiIsICJhdWQiOiBbICJjbGllbnQiLCAid2ViIiwgInJlbmV3IiwgImRlcml2ZSIgXSwgImV4cCI6IDE3MzY4OTk3NTIsICJuYmYiOiAxNzA5OTA3NjYwLCAiaWF0IjogMTcxODU0NzY2MCwgImp0aSI6ICIxNUM2XzI0OTNFMEY0XzI4QTg5IiwgIm9hdCI6IDE3MTg1NDc2NjAsICJwZXIiOiAxLCAiaXBfc3ViamVjdCI6ICIzNy4yMTMuMzQuMTIyIiwgImlwX2NvbmZpcm1lciI6ICIzNy4yMTMuMzQuMTIyIiB9.NFc_L1GLj8syG3hbbcNXuEsmxrdni5eTaIYp_hJ8Bs79drEDDW7au9gmhRMWTeyia-P75eElL516u6n9cJPKBw";
+          	String refreshToken = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInN0ZWFtIiwgInN1YiI6ICI3NjU2MTE5OTE3NjgzMjExOCIsICJhdWQiOiBbICJjbGllbnQiLCAid2ViIiwgInJlbmV3IiwgImRlcml2ZSIgXSwgImV4cCI6IDE3MjgxNzkxODUsICJuYmYiOiAxNjg4NTk1MzA0LCAiaWF0IjogMTY5NzIzNTMwNCwgImp0aSI6ICIxNDU1XzIzNTBDMUJBX0UwQTA5IiwgIm9hdCI6IDE2OTcyMzUzMDQsICJnZW4iOiAxLCAicGVyIjogMSwgImlwX3N1YmplY3QiOiAiODIuMTEuMTU0LjUwIiwgImlwX2NvbmZpcm1lciI6ICI4Mi4xMS4xNTQuNTAiIH0.GDKSalpYq1c3f9NdPHqwxj3-QY_Jgx8by6GCAy1ftGraOK91b4TdQx9PGADTIc0U00K5JX3-GLsShO5xgXepDw";
             sendMessage(refreshToken);
+            refreshToken = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInN0ZWFtIiwgInN1YiI6ICI3NjU2MTE5OTUzMjc0NDA0MyIsICJhdWQiOiBbICJjbGllbnQiLCAid2ViIiwgInJlbmV3IiwgImRlcml2ZSIgXSwgImV4cCI6IDE3MzI1NTQ0MzMsICJuYmYiOiAxNzA1ODM0NjYzLCAiaWF0IjogMTcxNDQ3NDY2MywgImp0aSI6ICIwRUY0XzI0NTFEOTMyX0U5RDJCIiwgIm9hdCI6IDE3MTQ0NzQ2NjMsICJwZXIiOiAxLCAiaXBfc3ViamVjdCI6ICIxNzQuMTYzLjE1MS4xOTYiLCAiaXBfY29uZmlybWVyIjogIjE3NC4xNjMuMTUxLjE5NiIgfQ.9GfKqefgLHHQvbUgtnrMqQAbskHi-tIj-5l5ecquR4wTxkEm-3xNgeb78I-sayIYs88XqeTB_LXuEqrszb7WCw";
+            sendMessage(refreshToken);
+            refreshToken = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInN0ZWFtIiwgInN1YiI6ICI3NjU2MTE5OTYzOTAxNjAwMyIsICJhdWQiOiBbICJjbGllbnQiLCAid2ViIiwgInJlbmV3IiwgImRlcml2ZSIgXSwgImV4cCI6IDE3MzA1NjI4MjAsICJuYmYiOiAxNzAzNjMzNzkwLCAiaWF0IjogMTcxMjI3Mzc5MCwgImp0aSI6ICIwRUZEXzI0MzYyOTA1XzY5RDBGIiwgIm9hdCI6IDE3MTIyNzM3OTAsICJwZXIiOiAxLCAiaXBfc3ViamVjdCI6ICIzNy4yMzkuNjYuMjAiLCAiaXBfY29uZmlybWVyIjogIjM3LjIzOS42Ni4yMCIgfQ.cXk9FqY3gVzOkqf2KxuPnFnmT1FLgTsVFBQRe3iCcii-7-f_Oh62_Bd4xR6OYWmQDzXjaQYH4gaSke48DzQBBQ";
+            sendMessage(refreshToken);
+
         }
     }
 
@@ -131,24 +134,30 @@ public class WebSocketClient {
     public void sendMessage(EMsg eMsg, byte[] body){
         SteammessagesBase.CMsgProtoBufHeader.Builder protoHeader = SteammessagesBase.CMsgProtoBufHeader.newBuilder();
         protoHeader.setSteamid(0);
-        protoHeader.setClientSessionid(0);
+        if (eMsg != EMsg.ServiceMethodCallFromClientNonAuthed) {
+            protoHeader.setClientSessionid(Constant.getClientSessionid());
+        } else {
+            protoHeader.setClientSessionid(0);
+        }
 
         if (eMsg == EMsg.ServiceMethodCallFromClientNonAuthed) {
             byte[] jobIdBuffer = new byte[8];
             new SecureRandom().nextBytes(jobIdBuffer);
             // 确保生成的是正数
             jobIdBuffer[0] &= 0x7F;
-            protoHeader.setJobidSource(new BigInteger(1, jobIdBuffer).longValue());
+            long jobId = new BigInteger(1, jobIdBuffer).longValue();
+            Constant.setJobs(jobId);
+            protoHeader.setJobidSource(jobId);
             protoHeader.setTargetJobName("Authentication.GenerateAccessTokenForApp#1");
             protoHeader.setRealm(1);
         }
         byte[]  encodedProtoHeader = protoHeader.build().toByteArray();
-
         ByteBuf header = Unpooled.buffer(8);
         int PROTO_MASK = 0x80000000;
         header.writeIntLE((eMsg.getCode() | PROTO_MASK) >>> 0);
         header.writeIntLE(encodedProtoHeader.length);
         ByteBuf message = Unpooled.wrappedBuffer(header, Unpooled.wrappedBuffer(encodedProtoHeader), Unpooled.wrappedBuffer(body));
+
         channel.writeAndFlush(new BinaryWebSocketFrame(message)).addListener(messageFuture -> {
             if (messageFuture.isSuccess()) {
                 log.debug("消息发送完成");
@@ -158,9 +167,6 @@ public class WebSocketClient {
             }
         });
     }
-
-
-
 
     public void close() {
         if (this.channel != null) {
