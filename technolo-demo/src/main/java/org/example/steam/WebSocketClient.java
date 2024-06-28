@@ -116,19 +116,10 @@ public class WebSocketClient {
     public void sendMessage(String refreshToken){
         SteammessagesAuthSteamclient.CAuthentication_AccessToken_GenerateForApp_Request.Builder builder = SteammessagesAuthSteamclient.CAuthentication_AccessToken_GenerateForApp_Request.newBuilder();
         builder.setRefreshToken(refreshToken);
-        builder.setSteamid(decodeJwt(refreshToken).getLong("sub"));
+        builder.setSteamid(TokenUtil.decodeToken(refreshToken).getLong("sub"));
         builder.setRenewalType(SteammessagesAuthSteamclient.ETokenRenewalType.k_ETokenRenewalType_None);
         byte[] body = builder.build().toByteArray();
         sendMessage(EMsg.ServiceMethodCallFromClientNonAuthed, body);
-    }
-
-    public JSONObject decodeJwt(String refreshToken){
-        String[] parts = refreshToken.split("\\.");
-        if (parts.length != 3) {
-            throw new IllegalArgumentException("Invalid JWT");
-        }
-        String standardBase64 = parts[1].replace('-', '+').replace('_', '/');
-        return JSONUtil.parseObj(new String(Base64.getDecoder().decode(standardBase64)));
     }
 
     public void sendMessage(EMsg eMsg, byte[] body){

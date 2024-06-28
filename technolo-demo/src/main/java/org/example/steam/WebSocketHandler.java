@@ -1,5 +1,7 @@
 package org.example.steam;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.util.URLUtil;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -96,8 +98,12 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
             } else {
                 SteammessagesAuthSteamclient.CAuthentication_AccessToken_GenerateForApp_Response response =
                         SteammessagesAuthSteamclient.CAuthentication_AccessToken_GenerateForApp_Response.parseFrom(msgBody.nioBuffer());
-                System.out.println("refreshToken:"+response.getRefreshToken());
-                System.out.println("accessToken:"+response.getAccessToken());
+                System.out.println("refreshToken: "+response.getRefreshToken());
+                System.out.println("accessToken: "+response.getAccessToken());
+                System.out.println("cookie: " + URLUtil.encode(StrUtil.format("steamLoginSecure={}||{}",
+                        TokenUtil.decodeToken(response.getAccessToken()).getLong("sub"), response.getAccessToken())));
+
+
             }
             return;
         }
