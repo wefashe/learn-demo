@@ -25,7 +25,7 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.SecureRandom;
-import java.util.Base64;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class WebSocketClient {
@@ -80,7 +80,7 @@ public class WebSocketClient {
                         // 认证包在连接成功后5秒内发送，否则会强制断开连接
                         this.sendAuthRequest();
                         // 心跳包30秒左右发送一次，否则60秒后会被强制断开连接,正文可以为空或任意字符
-                        // this.sendHeartbeat();
+                        this.sendHeartbeat();
                     } else {
                         log.error("握手失败!", handshakeFuture.cause());
                         handshakeFuture.cause().printStackTrace();
@@ -91,6 +91,26 @@ public class WebSocketClient {
                 connectFuture.cause().printStackTrace();
             }
         });
+    }
+
+    private void sendHeartbeat() {
+        if (this.channel != null && this.channel.isActive()) {
+            channel.eventLoop().scheduleAtFixedRate(() -> {
+                if (channel.isActive()) {
+                    SteammessagesClientserverLogin.CMsgClientHeartBeat.Builder builder = SteammessagesClientserverLogin.CMsgClientHeartBeat.newBuilder();
+                    builder.setSendReply(false);
+                    byte[] byteArray = builder.build().toByteArray();
+                    sendMessage(EMsg.ClientHeartBeat, byteArray, null);
+                }
+            }, 5000, 5000, TimeUnit.MILLISECONDS);
+
+            channel.eventLoop().schedule(() -> {
+                if (channel.isActive()) {
+                    String refreshToken = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0.eyAiaXNzIjogInN0ZWFtIiwgInN1YiI6ICI3NjU2MTE5OTYzOTAxNjAwMyIsICJhdWQiOiBbICJjbGllbnQiLCAid2ViIiwgInJlbmV3IiwgImRlcml2ZSIgXSwgImV4cCI6IDE3MzA1NjI4MjAsICJuYmYiOiAxNzAzNjMzNzkwLCAiaWF0IjogMTcxMjI3Mzc5MCwgImp0aSI6ICIwRUZEXzI0MzYyOTA1XzY5RDBGIiwgIm9hdCI6IDE3MTIyNzM3OTAsICJwZXIiOiAxLCAiaXBfc3ViamVjdCI6ICIzNy4yMzkuNjYuMjAiLCAiaXBfY29uZmlybWVyIjogIjM3LjIzOS42Ni4yMCIgfQ.cXk9FqY3gVzOkqf2KxuPnFnmT1FLgTsVFBQRe3iCcii-7-f_Oh62_Bd4xR6OYWmQDzXjaQYH4gaSke48DzQBBQ";
+                    sendMessage(refreshToken);
+                }
+            },  50, TimeUnit.SECONDS);
+        }
     }
 
     private void sendAuthRequest() {

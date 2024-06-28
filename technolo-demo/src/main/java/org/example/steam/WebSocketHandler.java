@@ -84,12 +84,12 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
             Constant.setClientSessionid(protoBufHeader.getClientSessionid());
         }
 
-        EMsg eMsg = EMsg.forNumber((int) (rawEmsg & ~PROTO_MASK));
+        EMsg eMsg = EMsg.from((int) (rawEmsg & ~PROTO_MASK));
         if (eMsg != EMsg.Multi) {
             log.debug("返回消息类型: {} ({})", eMsg, protoBufHeader.getTargetJobName());
         }
         if (Constant.getJobs().containsKey(protoBufHeader.getJobidTarget())) {
-            EResult result = EResult.forNumber(protoBufHeader.getEresult());
+            EResult result = EResult.from(protoBufHeader.getEresult());
             if (result != EResult.OK) {
                 String errorMessage = protoBufHeader.getErrorMessage();
                 log.error("返回错误消息: {} ({})", result, errorMessage);
@@ -113,16 +113,22 @@ public class WebSocketHandler extends SimpleChannelInboundHandler<Object> {
         // 这不是一个响应消息，所以需要确定它是什么类型的消息
         switch (eMsg) {
             case ClientLogOnResponse:
-                SteammessagesClientserverLogin.CMsgClientLogonResponse logonResponse = SteammessagesClientserverLogin.CMsgClientLogonResponse.parseFrom(msgBody.nioBuffer());
-                System.out.printf("Received ClientLogOnResponse with result: %s%n", logonResponse.getEresult());
-                break;
+                SteammessagesClientserverLogin.CMsgClientLogonResponse response =
+                        SteammessagesClientserverLogin.CMsgClientLogonResponse.parseFrom(msgBody.nioBuffer());
+                EResult result = EResult.from(response.getEresult());
+                if (result == EResult.OK) {
 
+                } else if (result == EResult.TryAnotherCM || result == EResult.ServiceUnavailable) {
+                    log.error("返回错误消息: {}", result);
+                    // try
+                }
+                break;
             case Multi:
                processMultiMsg(msgBody);
                 break;
 
             default:
-                System.out.printf("Received unexpected message: %d%n", eMsg);
+                System.out.printf("Received unexpected message: " + eMsg.getCode());
         }
 
     }

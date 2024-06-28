@@ -1970,7 +1970,7 @@ public enum EMsg {
         return code;
     }
 
-    public static EMsg forNumber(int code) {
+    public static EMsg from(int code) {
         for (EMsg eMsg : EMsg.values()) {
             if (eMsg.getCode() == code) {
                 return eMsg;

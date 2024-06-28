@@ -154,7 +154,7 @@ public enum EResult {
         return code;
     }
 
-    public static EResult forNumber(int code) {
+    public static EResult from(int code) {
         for (EResult eResult : EResult.values()) {
             if (eResult.getCode() == code) {
                 return eResult;
