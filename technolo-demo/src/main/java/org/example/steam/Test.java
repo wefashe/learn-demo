@@ -16,7 +16,16 @@ import java.util.stream.Collectors;
 
 public class Test {
     public static void main(String[] args) throws Exception {
-        String url = "https://api.steampowered.com/ISteamDirectory/GetCMListForConnect/v0001/?cellid=0&format=js";
+
+        InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE);
+        // String wss = getWssUrl();
+        String wss = "wss://ext1-atl3.steamserver.net:27019/cmsocket/";
+        WebSocketClient client = new WebSocketClient(wss);
+        client.connect();
+    }
+
+    public static String getWssUrl(){
+                String url = "https://api.steampowered.com/ISteamDirectory/GetCMListForConnect/v0001/?cellid=0&format=js";
         String result = HttpRequest.get(url)
                 .header(Header.USER_AGENT, "user-agent")
                 .header(Header.ACCEPT_CHARSET,"ISO-8859-1,utf-8,*;q=0.7")
@@ -29,18 +38,8 @@ public class Test {
                 .sorted(Comparator.comparing(obj -> ((JSONObject) obj).getFloat("wtd_load")))
                 .filter(obj -> StrUtil.equals("websockets", obj.getStr("type")) && StrUtil.equals("steamglobal", obj.getStr("realm"))
                 ).collect(Collectors.toList());
-//        for (JSONObject o : cmList) {
-//            System.out.println(o.toStringPretty());
-//        }
-
         int randUpperBound = Math.min(20, cmList.size());
-        int randomIndex = new Random().nextInt(randUpperBound);
-        JSONObject cm = cmList.get(randomIndex);
-
-        String wss = StrUtil.format("wss://{}/cmsocket/", cm.getStr("endpoint"));
-        System.out.println(wss);
-        InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE);
-        WebSocketClient client = new WebSocketClient(wss);
-        client.connect();
+        JSONObject cm = cmList.get(new Random().nextInt(randUpperBound));
+        return StrUtil.format("wss://{}/cmsocket/", cm.getStr("endpoint"));
     }
 }
